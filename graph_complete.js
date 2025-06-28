@@ -5,18 +5,17 @@
 import { createVisualization } from './chart_gen/chart_factory.js';
 import { loadGeneratedData } from './chart_gen/data_load.js';
 import { createAxisConfig, prepareDataForChart, makefinaldata } from './chart_gen/data_processor.js';
+import { validateAllInputs } from './chart_gen/data_validate.js';
 
 function showError(message) {
   const errorDiv = document.getElementById('error-message');
   errorDiv.textContent = message;
   errorDiv.style.display = 'block';
 }
-
 function hideError() {
   const errorDiv = document.getElementById('error-message');
   errorDiv.style.display = 'none';
 }
-
 //이벤트 리스너 추가
 function setupEventListeners() {
   document.getElementById('create-chart-btn').addEventListener('click', createChart);
@@ -32,241 +31,105 @@ function setupEventListeners() {
   });
 }
 
+/**
+ * 폼에서 입력값들을 수집하는 함수
+ */
+function getFormData() {
+  return {
+    dimension: document.getElementById('dimension').value,
+    chartType: document.getElementById('chart-type').value.trim(),
+    xAxisName: document.getElementById('x-axis').value.trim(),
+    yAxisName: document.getElementById('y-axis').value.trim(),
+    colorAxisName: document.getElementById('color-axis').value.trim(),
+    sizeAxisName: document.getElementById('size-axis').value.trim(),
+    sizeScalingType: document.getElementById('size-scaling-type').value.trim(),
+    sizeScalingK: document.getElementById('size-scaling-k').value.trim(),
+    xRangeMin: document.getElementById('x-range-min').value.trim(),
+    xRangeMax: document.getElementById('x-range-max').value.trim(),
+    yRangeMin: document.getElementById('y-range-min').value.trim(),
+    yRangeMax: document.getElementById('y-range-max').value.trim(),
+    chartTitle: document.getElementById('chart-title').value.trim() || 'Chart'
+  };
+}
+
+/**
+ * 차트 생성 메인 함수 - 이제 단순히 데이터를 받아서 createVisualization에 전달
+ */
 function createChart() {
+  // 1. 데이터 존재 여부 확인
   if (!generatedData) {
     showError('No data available');
     return;
   }
   
-  // Get form values
-  const dimension = document.getElementById('dimension').value;
-  const chartType = document.getElementById('chart-type').value.trim();
-  const xAxisName = document.getElementById('x-axis').value.trim();
-  const yAxisName = document.getElementById('y-axis').value.trim();
-  const colorAxisName = document.getElementById('color-axis').value.trim();
-  const sizeAxisName = document.getElementById('size-axis').value.trim();
-  const sizeScalingType = document.getElementById('size-scaling-type').value.trim();
-  const sizeScalingK = document.getElementById('size-scaling-k').value.trim();
-  const xRangeMin = document.getElementById('x-range-min').value.trim();
-  const xRangeMax = document.getElementById('x-range-max').value.trim();
-  const yRangeMin = document.getElementById('y-range-min').value.trim();
-  const yRangeMax = document.getElementById('y-range-max').value.trim();
-  const chartTitle = document.getElementById('chart-title').value.trim() || 'Chart';
-  
-  // Basic validation
-  if (!chartType) {
-    showError('Please enter a chart type');
+  // 2. 폼 데이터 수집
+  const formData = getFormData();
+  // 3. 모든 유효성 검사를 한번에 수행
+  const validation = validateAllInputs(formData, generatedData, createAxisConfig);
+  if (!validation.isValid) {
+    showError(validation.error);
     return;
   }
   
-  if (!xAxisName) {
-    showError('Please enter X axis name');
-    return;
-  }
-  
-  // Check if this chart type needs Y axis
-  const needsYAxis = chartType === 'scatter' || 
-                     chartType.includes('scatter') || 
-                     chartType === 'bar' || 
-                     chartType.includes('bar');
-  
-  // For charts that need Y axis, require it for 2D+
-  if (parseInt(dimension) >= 2 && needsYAxis && !yAxisName) {
-    showError(`Please enter Y axis name for ${chartType} charts`);
-    return;
-  }
-  
-  // Validate size scaling configuration
-  var scalingConfig = { type: 'default', params: {} };
-  
-  if (sizeScalingType) {
-    // Validate scaling type (case sensitive)
-    if (sizeScalingType !== 'default' && sizeScalingType !== 'sigmoid') {
-      showError('Size Scaling Type must be exactly "default" or "sigmoid"');
-      return;
-    }
-    
-    if (sizeScalingType === 'sigmoid') {
-      // Require K value for sigmoid
-      if (!sizeScalingK) {
-        showError('K Value is required when using sigmoid scaling');
-        return;
-      }
-      
-      // Validate K value is a number between 0.1 and 10.0
-      const kValue = parseFloat(sizeScalingK);
-      if (isNaN(kValue) || kValue < 0.1 || kValue > 10.0) {
-        showError('K Value must be a number between 0.1 and 10.0');
-        return;
-      }
-      
-      scalingConfig = {
-        type: 'sigmoid',
-        params: { k: kValue }
-      };
-    } else {
-      // For default scaling, ignore K value completely
-      scalingConfig = {
-        type: 'default',
-        params: {}
-      };
-    }
-  }
-  
-  // Validate windowing ranges
-  const windowRanges = {};
-  
-  // Validate X axis range if provided
-  if (xRangeMin || xRangeMax) {
-    if (!xRangeMin || !xRangeMax) {
-      showError('Both X Axis Range Min and Max must be provided if using X axis windowing');
-      return;
-    }
-    const xMin = parseFloat(xRangeMin);
-    const xMax = parseFloat(xRangeMax);
-    if (isNaN(xMin) || isNaN(xMax) || xMin >= xMax) {
-      showError('X Axis Range Min must be less than Max and both must be valid numbers');
-      return;
-    }
-    windowRanges[xAxisName] = { min: xMin, max: xMax };
-  }
-  
-  // Validate Y axis range if provided and Y axis is used
-  if (yRangeMin || yRangeMax) {
-    if (!needsYAxis) {
-      // Ignore Y range for charts that don't use Y axis
-      console.log('Ignoring Y axis range for chart type that does not use Y axis');
-    } else {
-      if (!yRangeMin || !yRangeMax) {
-        showError('Both Y Axis Range Min and Max must be provided if using Y axis windowing');
-        return;
-      }
-      const yMin = parseFloat(yRangeMin);
-      const yMax = parseFloat(yRangeMax);
-      if (isNaN(yMin) || isNaN(yMax) || yMin >= yMax) {
-        showError('Y Axis Range Min must be less than Max and both must be valid numbers');
-        return;
-      }
-      windowRanges[yAxisName] = { min: yMin, max: yMax };
-    }
-  }
+  // 4. 검증된 데이터 추출
+  const { axes, scalingConfig, windowRanges } = validation.validatedData;
   
   try {
-    // Build axes array based on chart type and inputs
-    const axes = [];
-    
-    // Always add X axis
-    const xAxis = createAxisConfig(xAxisName, generatedData);
-    if (!xAxis) {
-      showError(`X axis "${xAxisName}" not found in data`);
-      return;
-    }
-    axes.push(xAxis);
-    
-    // Add Y axis only for charts that need it
-    if (needsYAxis && yAxisName) {
-      const yAxis = createAxisConfig(yAxisName, generatedData);
-      if (!yAxis) {
-        showError(`Y axis "${yAxisName}" not found in data`);
-        return;
-      }
-      axes.push(yAxis);
-    }
-    
-    // Add 3rd and 4th axes based on chart type
-    if (parseInt(dimension) >= 2) {
-      // Determine which axes are needed based on chart type
-      const needsColor = chartType.includes('color') || chartType === 'size_color' || chartType === 'color';
-      const needsSize = chartType.includes('size') || chartType === 'size_color' || chartType === 'size';
-      
-      // For charts that need color
-      if (needsColor && colorAxisName) {
-        const colorAxis = createAxisConfig(colorAxisName, generatedData);
-        if (!colorAxis) {
-          showError(`Color axis "${colorAxisName}" not found in data`);
-          return;
-        }
-        axes.push(colorAxis);
-      }
-      
-      // For charts that need size
-      if (needsSize && sizeAxisName) {
-        const sizeAxis = createAxisConfig(sizeAxisName, generatedData);
-        if (!sizeAxis) {
-          showError(`Size axis "${sizeAxisName}" not found in data`);
-          return;
-        }
-        axes.push(sizeAxis);
-      }
-    }
-    
-    console.log('📊 Built axes configuration:', axes);
-    console.log('📏 Size scaling configuration:', scalingConfig);
-    
-    // Create dataset configuration
-    const dataset = {
-      name: chartTitle,
-      dimension: parseInt(dimension),
-      axes: axes,
-      dataType: `${dimension}D`
-    };
-    
-    // Create visualization type
-    const vizType = {
-      name: chartType,
-      type: chartType
-    };
-    
-    // Prepare data for visualization
+    // 5. 데이터 준비
     const preparedData = prepareDataForChart(generatedData.data_value, axes);
-    console.log(preparedData);
-  
+
     if (preparedData.length === 0) {
       showError('No valid data points found for the specified axes');
       return;
     }
     
+    // 6. 윈도우 필터링 적용
     const finalData = makefinaldata(preparedData, windowRanges, showError);
     
     if (!finalData || finalData.length === 0) {
       showError('No valid data points found after processing');
       return;
     }
-
-    console.log('📋 Final data:', finalData.slice(0, 3), '... (showing first 3 points)');
+        
+    // 7. 차트 설정 객체 생성
+    const dataset = {
+      name: formData.chartTitle,
+      dimension: parseInt(formData.dimension),
+      axes: axes,
+      dataType: `${formData.dimension}D`
+    };
+    const vizType = {
+      name: formData.chartType,
+      type: formData.chartType
+    };
     
-    // Destroy existing chart
+    // 8. 기존 차트 정리
     if (currentChart) {
       currentChart.destroy();
       currentChart = null;
     }
     
-    // Show chart container
+    // 9. 차트 컨테이너 표시
     const chartContainer = document.getElementById('chart-container');
     chartContainer.style.display = 'block';
-    
-    // Get canvas element
     const canvas = document.getElementById('chart-canvas');
     canvas.style.width = '100%';
     canvas.style.height = '400px';
     
-    // Create chart using chart factory
+    // 10. 차트 생성 - 이제 단순히 createVisualization에 데이터 전달
     const chartConfig = createVisualization(
       dataset,
       vizType,
       finalData,
       scalingConfig,
-      {},
-      {}
+      {}, // colorScalingConfig
+      {}  // vizOptions
     );
     
-    // Create Chart.js instance
+    // 11. Chart.js 인스턴스 생성
     currentChart = new Chart(canvas, chartConfig);
-    
-    console.log('✅ Chart created successfully');
-    
+        
   } catch (error) {
-    console.error('❌ Chart creation failed:', error);
     showError('Chart creation failed: ' + error.message);
   }
 }

@@ -32,8 +32,8 @@ export function createVisualization(dataset, vizType, data, scalingConfig = {}, 
     switch (vizType.type) {
       // 1D visualizations
       case 'line1d':
-        console.log(`📈 Creating 1D line chart`);
-        chartConfig = create1DLineChart(data, dataset);
+        console.log(`📈 Creatinge 1D line chart`);
+        chartConfig = create1DLinChart(data, dataset);
         break;
       case 'category':
         console.log(`📊 Creating category chart`);
