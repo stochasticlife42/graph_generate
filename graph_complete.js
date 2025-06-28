@@ -2,20 +2,18 @@
 // Simplified chart creation logic with dimension flexibility
 
 // Import chart factory
-import { createVisualization } from './chart_factory.js';
+import { createVisualization } from './visualizations/chart_factory.js';
 // Import size scaling functions
-import { applyScaling, defaultScaling, sigmoidScaling } from './scaling/size_scaling.js';
+//import { applyScaling, defaultScaling, sigmoidScaling } from './visualizations/scaling/size_scaling.js';
 
 // Main application logic
 let generatedData = null;
 let currentChart = null;
 
 // Load data on page load
-document.addEventListener('DOMContentLoaded', () => {
-  loadGeneratedData();
-  setupEventListeners();
-});
 
+
+//원본 데이터 수신
 function loadGeneratedData() {
   hideError();
   
@@ -53,7 +51,7 @@ function loadGeneratedData() {
       '<strong>❌ Error loading data.</strong> <a href="index.html">Go back to generate data</a>';
   }
 }
-
+//이벤트 리스너 추가
 function setupEventListeners() {
   document.getElementById('create-chart-btn').addEventListener('click', createChart);
   
@@ -67,6 +65,31 @@ function setupEventListeners() {
     }
   });
 }
+//축 정보 객체 생성 -> 데이터 프로세서로 이동
+function createAxisConfig(axisName) {
+  if (axisName === 'value') {
+    return {
+      name: axisName,
+      type: 'output',
+      index: 0
+    };
+  } else {
+    const axisIndex = findAxisIndex(axisName);
+    if (axisIndex === -1) {
+      return null; // Invalid axis
+    }
+    return {
+      name: axisName,
+      type: 'input',
+      index: axisIndex
+    };
+  }
+}
+//데이터 받아서 createVisualization함수 실행 -> chart_factory, 데이터 가공부, 확인부, 차트 생성 연결부 나누기
+//데이터를 받아서 createVisualization함수에 전달
+//추가 필요
+//1. 데이터 무결성 학인함수
+//2. 데이터 가공부
 
 function createChart() {
   if (!generatedData) {
@@ -100,7 +123,7 @@ function createChart() {
     return;
   }
   
-  // Check if this chart type needs Y axis
+  // Check if this chart type needs Y axis -> 데이터 프로세서로 이동하고 새로운 함수로 분리
   const needsYAxis = chartType === 'scatter' || 
                      chartType.includes('scatter') || 
                      chartType === 'bar' || 
@@ -113,7 +136,7 @@ function createChart() {
   }
   
   // Validate size scaling configuration
-  let scalingConfig = { type: 'default', params: {} };
+  var scalingConfig = { type: 'default', params: {} };
   
   if (sizeScalingType) {
     // Validate scaling type (case sensitive)
@@ -189,26 +212,6 @@ function createChart() {
   
   try {
     // Helper function to create axis configuration
-    function createAxisConfig(axisName) {
-      if (axisName === 'value') {
-        return {
-          name: axisName,
-          type: 'output',
-          index: 0
-        };
-      } else {
-        const axisIndex = findAxisIndex(axisName);
-        if (axisIndex === -1) {
-          return null; // Invalid axis
-        }
-        return {
-          name: axisName,
-          type: 'input',
-          index: axisIndex
-        };
-      }
-    }
-    
     // Build axes array based on chart type and inputs
     const axes = [];
     
@@ -281,14 +284,15 @@ function createChart() {
     
     // Prepare data for visualization (simplified version)
     const preparedData = prepareDataForChart(generatedData.data_value, axes);
-    
+    console.log(preparedData)
+  
     if (preparedData.length === 0) {
       showError('No valid data points found for the specified axes');
       return;
     }
     
     // Apply windowing if ranges are provided
-    let finalData = preparedData;
+    var finalData = preparedData;
     if (Object.keys(windowRanges).length > 0) {
       finalData = applyWindowFiltering(preparedData, windowRanges);
       console.log(`🪟 Applied windowing: ${preparedData.length} → ${finalData.length} points`);
@@ -336,7 +340,7 @@ function createChart() {
     showError('Chart creation failed: ' + error.message);
   }
 }
-
+// 축 정보 탐색 및 정보 리턴 -> 데이터 프로세서로 이동
 function findAxisIndex(axisName) {
   if (!generatedData.basic_data || !generatedData.basic_data.axes) {
     return -1;
@@ -395,7 +399,6 @@ function prepareDataForChart(dataValue, axes) {
   
   return preparedData;
 }
-
 // Apply window filtering to data (adapted from previous project)
 function applyWindowFiltering(data, windowRanges) {
   console.log(`🪟 Applying window filtering:`, windowRanges);
@@ -435,6 +438,14 @@ function hideError() {
   errorDiv.style.display = 'none';
 }
 
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  
+  loadGeneratedData();
+  setupEventListeners();
+});
 // Cleanup on page unload
 window.addEventListener('beforeunload', () => {
   if (currentChart) {
