@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Simple Chart View</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .chart-config {
+      max-width: 500px;
+      margin: 20px auto;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: #f9f9f9;
+    }
+    
+    .form-group {
+      margin-bottom: 15px;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: bold;
+    }
+    
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    
+    .form-group select {
+      background: white;
+    }
+    
+    .create-btn {
+      width: 100%;
+      padding: 12px;
+      background: #007bff;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    
+    .create-btn:hover {
+      background: #0056b3;
+    }
+    
+    .create-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    
+    .chart-container {
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background: white;
+    }
+    
+    .error-message {
+      color: red;
+      background: #fee;
+      padding: 10px;
+      border: 1px solid #fcc;
+      border-radius: 4px;
+      margin: 10px 0;
+    }
+    
+    .data-info {
+      background: #e3f2fd;
+      padding: 10px;
+      border-radius: 4px;
+      margin-bottom: 20px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Simple Chart Creation</h1>
+  
+  <!-- Data Info Section -->
+  <div id="data-info" class="data-info">
+    <strong>Loading data...</strong>
+  </div>
+  
+  <!-- Chart Configuration Form -->
+  <div class="chart-config">
+    <h2>Chart Configuration</h2>
+    
+    <div class="form-group">
+      <label for="dimension">Dimension:</label>
+      <select id="dimension">
+        <option value="1">1D</option>
+        <option value="2" selected>2D</option>
+        <option value="3">3D</option>
+        <option value="4">4D</option>
+      </select>
+    </div>
+    
+    <div class="form-group">
+      <label for="chart-type">Chart Type:</label>
+      <input type="text" id="chart-type" placeholder="Enter chart type (e.g., scatter, scatter_color, bar)">
+    </div>
+    
+    <div class="form-group">
+      <label for="x-axis">X Axis:</label>
+      <input type="text" id="x-axis" placeholder="Enter axis name (e.g., x0)">
+    </div>
+    
+    <div class="form-group">
+      <label for="y-axis">Y Axis:</label>
+      <input type="text" id="y-axis" placeholder="Enter axis name (e.g., x1)">
+    </div>
+    
+    <div class="form-group">
+      <label for="color-axis">Color Axis:</label>
+      <input type="text" id="color-axis" placeholder="Enter axis name (optional)">
+    </div>
+    
+    <div class="form-group">
+      <label for="size-axis">Size Axis:</label>
+      <input type="text" id="size-axis" placeholder="Enter axis name (optional)">
+    </div>
+    
+    <div class="form-group">
+      <label for="size-scaling-type">Size Scaling Type:</label>
+      <input type="text" id="size-scaling-type" placeholder="default or sigmoid">
+    </div>
+    
+    <div class="form-group">
+      <label for="size-scaling-k">Size Scaling K Value:</label>
+      <input type="text" id="size-scaling-k" placeholder="Number between 0.1 and 10.0 (for sigmoid only)">
+    </div>
+    
+    <div class="form-group">
+      <label for="x-range-min">X Axis Range Min:</label>
+      <input type="text" id="x-range-min" placeholder="Leave empty for no windowing">
+    </div>
+    
+    <div class="form-group">
+      <label for="x-range-max">X Axis Range Max:</label>
+      <input type="text" id="x-range-max" placeholder="Leave empty for no windowing">
+    </div>
+    
+    <div class="form-group">
+      <label for="y-range-min">Y Axis Range Min:</label>
+      <input type="text" id="y-range-min" placeholder="Leave empty for no windowing">
+    </div>
+    
+    <div class="form-group">
+      <label for="y-range-max">Y Axis Range Max:</label>
+      <input type="text" id="y-range-max" placeholder="Leave empty for no windowing">
+    </div>
+    
+    <div class="form-group">
+      <label for="chart-title">Chart Title:</label>
+      <input type="text" id="chart-title" value="My Chart">
+    </div>
+    
+    <button id="create-chart-btn" class="create-btn" disabled>Create Chart</button>
+    
+    <div id="error-message" class="error-message" style="display: none;"></div>
+  </div>
+  
+  <!-- Chart Display Area -->
+  <div id="chart-container" class="chart-container" style="display: none;">
+    <canvas id="chart-canvas"></canvas>
+  </div>
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.js"></script>
+  
+  <!-- Main Script -->
+  <script type="module" src="./visualizations/graph_complete.js"></script>
+</body>
+</html>

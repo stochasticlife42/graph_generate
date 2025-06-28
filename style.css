@@ -1,0 +1,413 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 10px;
+  background-color: #f5f5f5;
+}
+
+h1, h2 {
+  color: #333;
+}
+
+.section {
+  background: white;
+  padding: 10px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* ✅ 추가: 에러 및 정보 메시지 스타일 */
+.error {
+  color: #721c24;
+  background-color: #f8d7da;
+  border: 1px solid #f5c6cb;
+  padding: 15px;
+  border-radius: 4px;
+  margin: 10px 0;
+  font-weight: bold;
+}
+
+.warning {
+  color: #856404;
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  padding: 15px;
+  border-radius: 4px;
+  margin: 10px 0;
+}
+
+.info {
+  color: #055160;
+  background-color: #d1ecf1;
+  border: 1px solid #bee5eb;
+  padding: 15px;
+  border-radius: 4px;
+  margin: 10px 0;
+}
+
+/* Dimension Selector Styles */
+.selector-container {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.dimension-select-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dimension-select-wrapper label {
+  font-weight: bold;
+  min-width: 100px;
+}
+
+#dimension-select {
+  padding: 4px 6px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 7px;
+  min-width: 100px;
+}
+
+.axis-selectors {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  align-items: center;
+  min-height: 20px;
+}
+
+.axis-selector-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.axis-selector-item label {
+  font-size: 6px;
+  color: #666;
+  font-weight: bold;
+}
+
+.axis-select {
+  padding: 3px 5px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 7px;
+  min-width: 60px;
+}
+
+/* ✅ 개선: 비활성화된 옵션 스타일 */
+.axis-select option:disabled {
+  color: #999;
+  font-style: italic;
+}
+
+.primary-btn {
+  padding: 5px 10px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 7px;
+  font-weight: bold;
+  align-self: flex-start;
+  transition: background-color 0.2s;
+}
+
+.primary-btn:hover:not(:disabled) {
+  background: #0056b3;
+}
+
+.primary-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+/* Graph Container Styles */
+.graphs-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.graph-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 8px;
+  width: calc(33.333% - 7px);
+  box-sizing: border-box;
+  position: relative;
+  min-height: 400px; /* ✅ 추가: 최소 높이 설정 */
+}
+
+/* ✅ 개선: 그래프가 없을 때 메시지 스타일 */
+.graph-card .chart-container .error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  margin: 0;
+  font-size: 14px;
+}
+
+/* Delete button */
+.delete-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 12px;
+  height: 12px;
+  border: none;
+  background: #dc3545;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 8px;
+  line-height: 1;
+  padding: 0;
+  transition: background-color 0.2s;
+  z-index: 10; /* ✅ 추가: z-index 설정 */
+}
+
+.delete-btn:hover {
+  background: #c82333;
+}
+
+.graph-card h3 {
+  margin-top: 0;
+  margin-bottom: 5px;
+  padding-right: 30px; /* Space for delete button */
+  font-size: 8px;
+  color: #555;
+}
+
+/* Larger chart area */
+.chart-container {
+  margin: 10px 0; /* ✅ 추가: 여백 설정 */
+}
+
+.chart-container canvas {
+  width: 100%;
+  height: 300px;
+}
+
+/* Visualization type buttons */
+.viz-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-bottom: 5px;
+}
+
+.viz-button {
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fafafa;
+  font-size: 7px;
+  cursor: pointer;
+  transition: all 0.2s; /* ✅ 추가: 트랜지션 */
+}
+
+.viz-button:hover {
+  background: #e9ecef;
+}
+
+.viz-button.active {
+  background: #007bff;
+  color: white;
+}
+
+/* ✅ 추가: 옵션 섹션 스타일 */
+.options-container {
+  margin: 10px 0;
+  padding: 8px;
+  background: #f8f9fa;
+  border-radius: 4px;
+  border: 1px solid #e9ecef;
+}
+
+.option-section {
+  margin-bottom: 10px;
+}
+
+.option-section h4 {
+  margin: 0 0 8px 0;
+  font-size: 12px;
+  color: #495057;
+}
+
+/* ✅ 추가: 데이터셋 정보 스타일 */
+.dataset-info {
+  font-size: 10px;
+  color: #666;
+  background: #f8f9fa;
+  padding: 8px;
+  border-radius: 4px;
+  margin-top: 10px;
+  border-left: 3px solid #007bff;
+}
+
+/* ✅ 추가: 로딩 상태 스타일 */
+.loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  font-size: 14px;
+  color: #666;
+}
+
+.loading::before {
+  content: "⟳ ";
+  animation: spin 1s linear infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* ✅ 추가: 반응형 디자인 개선 */
+@media (max-width: 1200px) {
+  .graph-card {
+    width: calc(50% - 5px);
+  }
+}
+
+@media (max-width: 768px) {
+  .graph-card {
+    width: 100%;
+  }
+  
+  .axis-selectors {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .axis-selector-item {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .axis-selector-item label {
+    min-width: 60px;
+  }
+}
+
+/* ✅ 추가: 데이터 필터 버튼 스타일 */
+.filter-control {
+  margin-bottom: 10px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+}
+
+.filter-label {
+  font-weight: bold;
+  font-size: 12px;
+  margin-bottom: 5px;
+}
+
+.filter-buttons {
+  display: flex;
+  gap: 3px;
+  margin-bottom: 8px;
+}
+
+.filter-button {
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: white;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.2s;
+  min-width: 35px;
+}
+
+.filter-button:hover {
+  background: #f0f0f0;
+}
+
+.filter-button.active {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.filter-slider {
+  width: 100%;
+}
+
+.filter-value {
+  font-size: 11px;
+  color: #666;
+  text-align: center;
+  margin-top: 3px;
+}
+
+/* ✅ 추가: 데이터 윈도우 가로 배치 */
+.window-section .window-controls-container {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.window-section .axis-window-control {
+  flex: 1;
+  min-width: 200px;
+  max-width: calc(50% - 5px);
+}
+
+/* ✅ 추가: 반응형 디자인 개선 */
+@media (max-width: 1200px) {
+  .graph-card {
+    width: calc(50% - 5px);
+  }
+  
+  .window-section .axis-window-control {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .graph-card {
+    width: 100%;
+  }
+  
+  .axis-selectors {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .axis-selector-item {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .axis-selector-item label {
+    min-width: 60px;
+  }
+  
+  .window-section .window-controls-container {
+    flex-direction: column;
+  }
+  
+  .window-section .axis-window-control {
+    max-width: 100%;
+  }
+}
