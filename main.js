@@ -3,7 +3,7 @@ import { fetchGeneratedData, checkServerHealth } from './api.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   // 서버 상태 확인
-  const isServerRunning = await checkServerHealth();
+  const isServerRunning = checkServerHealth();
   if (!isServerRunning) {
     const statusDiv = document.createElement('div');
     statusDiv.style.cssText = 'background: #fee; border: 1px solid #fcc; padding: 10px; margin: 10px 0; border-radius: 4px;';
